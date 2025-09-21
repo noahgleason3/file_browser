@@ -1,11 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple File Browser</title>
+
+  <!-- Pico CSS (CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2/css/pico.min.css">
+
+  <!-- Font Awesome (CDN) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    main { max-width: 900px; margin: auto; padding-top: 2rem; }
+    .icon-cell { text-align: center; width: 72px; }
+    .icon-cell i { font-size: 1.35rem; }
+    .muted { opacity: 0.75; }
+    td:nth-child(2) a { word-break: break-word; }
+    footer { margin-top: 2rem; }
+  </style>
 </head>
 <body>
-    
+  <main>
+    <h1>Simple File Browser</h1>
+    <p class="muted">Click a file name to open it.</p>
+
+    <table role="grid">
+      <thead>
+        <tr>
+          <th class="icon-cell">Icon</th>
+          <th>File name (link)</th>
+          <th>File type</th>
+          <th>File size</th>
+        </tr>
+      </thead>
+      <tbody id="file-rows">
+        <tr data-file="hello.png" data-type="Image (PNG)">
+          <td class="icon-cell"><i class="fa-solid fa-file-image"></i></td>
+          <td><a href="./hello.png" target="_blank">hello.png</a></td>
+          <td>Image (PNG)</td>
+          <td class="size-cell">—</td>
+        </tr>
+        <tr data-file="hello.html" data-type="HTML">
+          <td class="icon-cell"><i class="fa-solid fa-file-code"></i></td>
+          <td><a href="./hello.html" target="_blank">hello.html</a></td>
+          <td>HTML</td>
+          <td class="size-cell">—</td>
+        </tr>
+        <tr data-file="sample.json" data-type="JSON">
+          <td class="icon-cell"><i class="fa-solid fa-code"></i></td>
+          <td><a href="./sample.json" target="_blank">sample.json</a></td>
+          <td>JSON</td>
+          <td class="size-cell">—</td>
+        </tr>
+        <tr data-file="readme.txt" data-type="Plain Text">
+          <td class="icon-cell"><i class="fa-solid fa-file-lines"></i></td>
+          <td><a href="./readme.txt" target="_blank">readme.txt</a></td>
+          <td>Plain Text</td>
+          <td class="size-cell">—</td>
+        </tr>
+        <tr data-file="hello.pdf" data-type="PDF">
+          <td class="icon-cell"><i class="fa-solid fa-file-pdf"></i></td>
+          <td><a href="./hello.pdf" target="_blank">hello.pdf</a></td>
+          <td>PDF</td>
+          <td class="size-cell">—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Browser Observations</h2>
+    <ul>
+      <li>PDF opened inline in the browser with a built-in viewer.</li>
+      <li>JSON and TXT displayed as raw text in a new tab.</li>
+      <li>The image opened in its own tab and scaled to fit the screen.</li>
+    </ul>
+
+    <footer class="muted">
+      <small>Built with Pico CSS &amp; Font Awesome</small>
+    </footer>
+  </main>
+
+  <script>
+    async function fillSizes() {
+      const rows = document.querySelectorAll('#file-rows tr');
+      for (const row of rows) {
+        const file = row.getAttribute('data-file');
+        const cell = row.querySelector('.size-cell');
+        try {
+          const res = await fetch(file, { method: 'HEAD' });
+          const len = res.headers.get('content-length');
+          if (len) cell.textContent = humanFileSize(parseInt(len, 10));
+          else cell.textContent = 'Unknown';
+        } catch {
+          cell.textContent = 'Unknown';
+        }
+      }
+    }
+    function humanFileSize(bytes) {
+      const k = 1024;
+      if (bytes < k) return bytes + ' B';
+      const units = ['KB','MB','GB'];
+      let i = -1;
+      do { bytes /= k; i++; } while (bytes >= k && i < units.length - 1);
+      return bytes.toFixed(1)+' '+units[i];
+    }
+    fillSizes();
+  </script>
 </body>
 </html>
